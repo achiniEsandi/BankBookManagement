@@ -1,69 +1,62 @@
-import React, { useEffect, useState } from 'react'
-import bankIcon from '../assets/bank_icon.png'
-import axios from 'axios'
+import React, { useEffect, useState } from 'react';
+import bankIcon from '../assets/bank_icon.png';
+import axios from 'axios';
 
 const BankBookDashboard = () => {
-  const [accounts, setAccounts] = useState([])
-  const [selectedAccount, setSelectedAccount] = useState(null)
+  const [accounts, setAccounts] = useState([]);
+  const [selectedAccount, setSelectedAccount] = useState(null);
   const [formData, setFormData] = useState({
     bankName: '',
     accountNumber: '',
     initialBalance: ''
-  })
-
-  const fetchAccounts = async () => {
-    try {
-      const { data } = await axios.get('/api/bank-account')
-      setAccounts(data)
-    } catch (err) {
-      console.error('Failed to fetch accounts', err)
-    }
-  }
-
+  });
   const [transactionData, setTransactionData] = useState({
     type: '',
     amount: '',
     remarks: ''
-  })
-  const [transactions, setTransactions] = useState([])
+  });
+  const [transactions, setTransactions] = useState([]);
 
-  const fetchTransactions = async () => {
-    if (!selectedAccount) return
+  // Fetch bank accounts
+  const fetchAccounts = async () => {
     try {
-      const { data } = await axios.get(
-        `/api/bank-account/transaction/account/${selectedAccount._id}`
-      )
-      setTransactions(data)
+      const { data } = await axios.get('/api/bank-account');
+      setAccounts(data);
     } catch (err) {
-      console.error('Failed to fetch transactions', err)
+      console.error('Failed to fetch accounts', err);
     }
-  }
+  };
 
-  useEffect(() => {
-    fetchAccounts()
-  }, [])
+  // Fetch transactions for selected account
+  const fetchTransactions = async () => {
+    if (!selectedAccount) return;
+    try {
+      const { data } = await axios.get(`/api/bank-book/${selectedAccount._id}/transactions`);
+      setTransactions(data);
+    } catch (err) {
+      console.error('Failed to fetch transactions', err);
+    }
+  };
 
-  useEffect(() => {
-    if (selectedAccount) fetchTransactions()
-  }, [selectedAccount])
-
+  // Add a new bank account
   const handleAddAccount = async () => {
     try {
       await axios.post('/api/bank-account/create', {
         ...formData,
         initialBalance: parseFloat(formData.initialBalance)
-      })
-      setFormData({ bankName: '', accountNumber: '', initialBalance: '' })
-      fetchAccounts()
+      });
+      setFormData({ bankName: '', accountNumber: '', initialBalance: '' });
+      fetchAccounts();
     } catch (err) {
-      console.error('Failed to add account', err)
+      console.error('Failed to add account', err);
     }
-  }
+  };
 
+  // Delete a bank account
   const handleDeleteAccount = async (accountNumber) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this account?");
+    const confirmDelete = window.confirm('Are you sure you want to delete this account?');
     if (!confirmDelete) return;
-  
+
     try {
       await axios.delete(`/api/bank-account/delete/${accountNumber}`);
       if (selectedAccount?.accountNumber === accountNumber) {
@@ -71,29 +64,45 @@ const BankBookDashboard = () => {
       }
       fetchAccounts();
     } catch (err) {
-      console.error("Failed to delete account", err);
-      alert("Error deleting the account.");
+      console.error('Failed to delete account', err);
+      alert('Error deleting the account.');
     }
   };
 
+  // Add a transaction for the selected account
   const handleAddTransaction = async () => {
     if (!transactionData.type || !transactionData.amount) {
-      return alert('Please fill all fields.')
+      return alert('Please fill all fields.');
     }
     try {
-      await axios.post('/api/bank-book/transaction/add-transaction', {
-        accountId: selectedAccount._id,
+      // Log transaction data to check if it's being sent properly
+      console.log(transactionData);
+
+      // Post transaction to the backend
+      await axios.post(`/api/bank-book/${selectedAccount._id}/add-transaction`, {
         transaction_type: transactionData.type,
         amount: parseFloat(transactionData.amount),
         description: transactionData.remarks
-      })
-      setTransactionData({ type: '', amount: '', remarks: '' })
-      fetchTransactions()
-      fetchAccounts()
+      });
+
+      // Clear the form and refresh transaction list
+      setTransactionData({ type: '', amount: '', remarks: '' });
+      fetchTransactions();
+      fetchAccounts();
     } catch (err) {
-      console.error('Failed to add transaction', err)
+      console.error('Failed to add transaction', err);
     }
-  }
+  };
+
+  // Fetch bank accounts on mount
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
+
+  // Fetch transactions when the selected account changes
+  useEffect(() => {
+    if (selectedAccount) fetchTransactions();
+  }, [selectedAccount]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -112,13 +121,10 @@ const BankBookDashboard = () => {
             Add New Bank Account
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* 🔽 Bank Name as Dropdown */}
             <select
               className="border border-gray-300 rounded px-4 py-2 focus:ring focus:ring-blue-200"
               value={formData.bankName}
-              onChange={e =>
-                setFormData({ ...formData, bankName: e.target.value })
-              }
+              onChange={e => setFormData({ ...formData, bankName: e.target.value })}
             >
               <option value="">Select Bank</option>
               <option value="Sampath">Sampath Bank</option>
@@ -132,18 +138,14 @@ const BankBookDashboard = () => {
               placeholder="Account Number"
               className="border border-gray-300 rounded px-4 py-2 focus:ring focus:ring-blue-200"
               value={formData.accountNumber}
-              onChange={e =>
-                setFormData({ ...formData, accountNumber: e.target.value })
-              }
+              onChange={e => setFormData({ ...formData, accountNumber: e.target.value })}
             />
             <input
               type="number"
               placeholder="Initial Balance"
               className="border border-gray-300 rounded px-4 py-2 focus:ring focus:ring-blue-200"
               value={formData.initialBalance}
-              onChange={e =>
-                setFormData({ ...formData, initialBalance: e.target.value })
-              }
+              onChange={e => setFormData({ ...formData, initialBalance: e.target.value })}
             />
           </div>
           <button
@@ -164,11 +166,7 @@ const BankBookDashboard = () => {
               <div
                 key={acc._id}
                 className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition
-                  ${
-                    selectedAccount?._id === acc._id
-                      ? 'bg-gray-300 border border-black-700 font-bold'
-                      : 'bg-gray-100 hover:bg-gray-200'
-                  }
+                  ${selectedAccount?._id === acc._id ? 'bg-gray-300 border border-black-700 font-bold' : 'bg-gray-100 hover:bg-gray-200'}
                 `}
               >
                 <button
@@ -203,9 +201,7 @@ const BankBookDashboard = () => {
               <select
                 className="border border-gray-300 rounded px-4 py-2"
                 value={transactionData.type}
-                onChange={e =>
-                  setTransactionData({ ...transactionData, type: e.target.value })
-                }
+                onChange={e => setTransactionData({ ...transactionData, type: e.target.value })}
               >
                 <option value="">Type</option>
                 <option value="deposit">Deposit</option>
@@ -218,18 +214,14 @@ const BankBookDashboard = () => {
                 placeholder="Amount"
                 className="border border-gray-300 rounded px-4 py-2"
                 value={transactionData.amount}
-                onChange={e =>
-                  setTransactionData({ ...transactionData, amount: e.target.value })
-                }
+                onChange={e => setTransactionData({ ...transactionData, amount: e.target.value })}
               />
               <input
                 type="text"
                 placeholder="Remarks"
                 className="border border-gray-300 rounded px-4 py-2"
                 value={transactionData.remarks}
-                onChange={e =>
-                  setTransactionData({ ...transactionData, remarks: e.target.value })
-                }
+                onChange={e => setTransactionData({ ...transactionData, remarks: e.target.value })}
               />
               <button
                 onClick={handleAddTransaction}
@@ -245,13 +237,10 @@ const BankBookDashboard = () => {
             ) : (
               <ul className="divide-y divide-gray-200">
                 {transactions.map(txn => (
-                  <li
-                    key={txn._id}
-                    className="py-4 flex justify-between items-center"
-                  >
+                  <li key={txn._id} className="py-4 flex justify-between items-center">
                     <div>
                       <p className="font-medium text-gray-800">
-                        {txn.transaction_type.replace('_', ' ')} – ₹{txn.amount}
+                        {txn.transaction_type.replace('_', ' ')} – LKR {txn.amount}
                       </p>
                       <p className="text-sm text-gray-500">
                         {txn.description} •{' '}
@@ -266,7 +255,7 @@ const BankBookDashboard = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BankBookDashboard
+export default BankBookDashboard;

@@ -15,9 +15,9 @@ export const addTransactionToAccount = async (req, res) => {
 
     // 2) Compute new balance
     let newBalance = bankAccount.balance;
-    if (transaction_type === "deposit") {
+    if (transaction_type === "deposit" || transaction_type === "unknown_deposit") {
       newBalance += amount;
-    } else if (transaction_type === "withdrawal") {
+    } else if (transaction_type === "withdrawal" || transaction_type === "bank_charge") {
       if (bankAccount.balance < amount) {
         return res.status(400).json({ error: "Insufficient funds" });
       }
