@@ -9,7 +9,7 @@ const BankBookTransactionSchema = new mongoose.Schema(
     },
     transaction_type: {
       type: String,
-      enum: ["deposit", "withdrawal"],
+      enum: ["deposit", "withdrawal", "bank_charge", "unknown_deposit"],
       required: true,
     },
     amount: {
