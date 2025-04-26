@@ -195,6 +195,14 @@ const BankBookDashboard = () => {
             <h2 className="text-xl font-semibold text-gray-700 mb-4">
               Transactions for {selectedAccount.bankName}
             </h2>
+            <button
+              className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              onClick={() => {
+                window.open(`/api/pdf/generate-statement/${selectedAccount._id}`, '_blank');
+              }}
+            >
+              Download Bank Statement (PDF)
+            </button>
 
             {/* Transaction Form */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
