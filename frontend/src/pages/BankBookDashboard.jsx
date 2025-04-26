@@ -252,7 +252,7 @@ const BankBookDashboard = () => {
                       </p>
                       <p className="text-sm text-gray-500">
                         {txn.description} •{' '}
-                        {new Date(txn.transactionDate).toLocaleDateString()}
+                        {txn.createdAt && !isNaN(new Date(txn.createdAt)) ? new Date(txn.createdAt).toLocaleDateString() : ''}
                       </p>
                     </div>
                   </li>

@@ -16,16 +16,20 @@ export const generateBankStatementPDF = async (req, res) => {
     doc.pipe(res);
 
     // BANK STATEMENT TITLE
-    doc.fontSize(20).text('BANK STATEMENT', { align: 'center', underline: true });
-    doc.moveDown(1.5);
+    doc.fontSize(20).text("Cosmo Exports Lanka (PVT) LTD", 50, 120, { align: "center" });
+    doc.fontSize(12).text("496/1, Naduhena, Meegoda, Sri Lanka", { align: "center" });
+    doc.text("Phone: +94 77 086 4011  +94 11 275 2373 | Email: cosmoexportslanka@gmail.com", { align: "center" });
+    doc.moveDown(2);
+    doc.fontSize(18).text("Bank Statement", { align: "center" });
+    doc.moveDown();
 
     // ACCOUNT HOLDER DETAILS
     doc.fontSize(12).fillColor('black').text('ACCOUNT HOLDER DETAILS', { bold: true, background: 'grey' });
     doc.moveDown(0.5);
     doc.fontSize(11)
-      .text(`Account Holder Name: ________________________`)
-      .text(`Registered Mobile Number: ___________________`)
-      .text(`Residential Address: ________________________`);
+      .text(`Account Holder Name: John Doe`)
+      .text(`Registered Mobile Number: +94 77 086 4011`)
+      .text(`Residential Address: Sri Lanka`);
     doc.moveDown(1);
 
     // ACCOUNT DETAILS
@@ -34,9 +38,7 @@ export const generateBankStatementPDF = async (req, res) => {
     doc.fontSize(11)
       .text(`Account Type: Savings`)
       .text(`Account Balance: ${account.balance}`)
-      .text(`FD Link: ________________________`)
       .text(`Total Balance: ${account.balance}`)
-      .text(`Nomination: ________________________`);
     doc.moveDown(1);
 
     // ACCOUNT STATEMENT
@@ -66,9 +68,11 @@ export const generateBankStatementPDF = async (req, res) => {
         credit = tx.amount;
       }
       x = doc.x;
-      doc.text(new Date(tx.createdAt).toLocaleDateString(), x, y, { width: colWidths[0] });
+      const txnDate = tx.createdAt ? new Date(tx.createdAt) : null;
+      const txnDateStr = txnDate && !isNaN(txnDate) ? txnDate.toLocaleDateString() : '';
+      doc.text(txnDateStr, x, y, { width: colWidths[0] });
       x += colWidths[0];
-      doc.text(new Date(tx.createdAt).toLocaleDateString(), x, y, { width: colWidths[1] });
+      doc.text(txnDateStr, x, y, { width: colWidths[1] });
       x += colWidths[1];
       doc.text(tx.description || '', x, y, { width: colWidths[2] });
       x += colWidths[2];
