@@ -75,7 +75,6 @@ const BankBookDashboard = () => {
       alert("Error deleting the account.");
     }
   };
-  
 
   const handleAddTransaction = async () => {
     if (!transactionData.type || !transactionData.amount) {
@@ -84,8 +83,9 @@ const BankBookDashboard = () => {
     try {
       await axios.post('/api/bank-book/transaction/add-transaction', {
         accountId: selectedAccount._id,
-        ...transactionData,
-        amount: parseFloat(transactionData.amount)
+        transaction_type: transactionData.type,
+        amount: parseFloat(transactionData.amount),
+        description: transactionData.remarks
       })
       setTransactionData({ type: '', amount: '', remarks: '' })
       fetchTransactions()
@@ -112,15 +112,21 @@ const BankBookDashboard = () => {
             Add New Bank Account
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input
-              type="text"
-              placeholder="Bank Name"
+            {/* 🔽 Bank Name as Dropdown */}
+            <select
               className="border border-gray-300 rounded px-4 py-2 focus:ring focus:ring-blue-200"
               value={formData.bankName}
               onChange={e =>
                 setFormData({ ...formData, bankName: e.target.value })
               }
-            />
+            >
+              <option value="">Select Bank</option>
+              <option value="Sampath">Sampath Bank</option>
+              <option value="HNB">Hatton National Bank (HNB)</option>
+              <option value="Commercial">Commercial Bank</option>
+              <option value="Peoples'">People's Bank</option>
+            </select>
+
             <input
               type="text"
               placeholder="Account Number"
@@ -154,7 +160,7 @@ const BankBookDashboard = () => {
             Your Bank Accounts
           </h2>
           <div className="space-y-3">
-          {accounts.map(acc => (
+            {accounts.map(acc => (
               <div
                 key={acc._id}
                 className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition
@@ -182,7 +188,6 @@ const BankBookDashboard = () => {
                 </button>
               </div>
             ))}
-
           </div>
         </section>
 
