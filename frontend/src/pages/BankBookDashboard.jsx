@@ -149,16 +149,16 @@ const BankBookDashboard = () => {
                 className={`w-full text-left px-4 py-3 rounded-lg transition
                   ${
                     selectedAccount?._id === acc._id
-                      ? 'bg-blue-100 border border-black-300'
+                      ? 'bg-yellow-300 border border-yellow-600 font-bold'
                       : 'bg-gray-100 hover:bg-gray-200'
                   }
                 `}
               >
-                <span className="font-semibold text-gray-800">
+                <span className="font-semibold text-gray-300">
                   {acc.bankName}
                 </span>{' '}
-                - {acc.accountNumber}{' '}
-                <span className="text-gray-600">(₹{acc.balance})</span>
+                - <span className="text-gray-200">{acc.accountNumber}</span>{' '}
+                <span className="text-gray-200">(LKR {acc.balance})</span>
               </button>
             ))}
           </div>
