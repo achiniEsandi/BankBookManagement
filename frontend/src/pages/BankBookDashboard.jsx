@@ -1,6 +1,5 @@
-// src/pages/BankBookDashboard.jsx
 import React, { useEffect, useState } from 'react'
-import bankIcon from '../assets/bank_icon.png';
+import bankIcon from '../assets/bank_icon.png'
 import axios from 'axios'
 
 const BankBookDashboard = () => {
@@ -12,7 +11,6 @@ const BankBookDashboard = () => {
     initialBalance: ''
   })
 
-  // fetch all bank accounts
   const fetchAccounts = async () => {
     try {
       const { data } = await axios.get('/api/bank-account')
@@ -22,7 +20,6 @@ const BankBookDashboard = () => {
     }
   }
 
-  // fetch transactions for selected account
   const [transactionData, setTransactionData] = useState({
     type: '',
     amount: '',
@@ -50,7 +47,6 @@ const BankBookDashboard = () => {
     if (selectedAccount) fetchTransactions()
   }, [selectedAccount])
 
-  // add a new bank account
   const handleAddAccount = async () => {
     try {
       await axios.post('/api/bank-account/create', {
@@ -64,7 +60,23 @@ const BankBookDashboard = () => {
     }
   }
 
-  // add a transaction
+  const handleDeleteAccount = async (accountNumber) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this account?");
+    if (!confirmDelete) return;
+  
+    try {
+      await axios.delete(`/api/bank-account/delete/${accountNumber}`);
+      if (selectedAccount?.accountNumber === accountNumber) {
+        setSelectedAccount(null);
+      }
+      fetchAccounts();
+    } catch (err) {
+      console.error("Failed to delete account", err);
+      alert("Error deleting the account.");
+    }
+  };
+  
+
   const handleAddTransaction = async () => {
     if (!transactionData.type || !transactionData.amount) {
       return alert('Please fill all fields.')
@@ -87,7 +99,7 @@ const BankBookDashboard = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Page Header */}
       <header className="max-w-4xl mx-auto mb-8 flex items-center space-x-4">
-      <img src={bankIcon} alt="Bank" className="h-10 w-10" />
+        <img src={bankIcon} alt="Bank" className="h-10 w-10" />
         <h1 className="text-3xl font-extrabold text-gray-800">
           Bank Book Management
         </h1>
@@ -142,25 +154,35 @@ const BankBookDashboard = () => {
             Your Bank Accounts
           </h2>
           <div className="space-y-3">
-            {accounts.map(acc => (
-              <button
+          {accounts.map(acc => (
+              <div
                 key={acc._id}
-                onClick={() => setSelectedAccount(acc)}
-                className={`w-full text-left px-4 py-3 rounded-lg transition
+                className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition
                   ${
                     selectedAccount?._id === acc._id
-                      ? 'bg-yellow-300 border border-yellow-600 font-bold'
+                      ? 'bg-gray-300 border border-black-700 font-bold'
                       : 'bg-gray-100 hover:bg-gray-200'
                   }
                 `}
               >
-                <span className="font-semibold text-gray-300">
-                  {acc.bankName}
-                </span>{' '}
-                - <span className="text-gray-200">{acc.accountNumber}</span>{' '}
-                <span className="text-gray-200">(LKR {acc.balance})</span>
-              </button>
+                <button
+                  onClick={() => setSelectedAccount(acc)}
+                  className="flex-1 text-left"
+                >
+                  <span className="font-semibold text-gray-300">{acc.bankName}</span> –{' '}
+                  <span className="text-gray-300">{acc.accountNumber}</span>{' '}
+                  <span className="text-gray-300">(LKR {acc.balance})</span>
+                </button>
+                <button
+                  onClick={() => handleDeleteAccount(acc.accountNumber)}
+                  className="ml-4 text-red-600 hover:text-red-800 font-bold"
+                  title="Delete Account"
+                >
+                  &#10005;
+                </button>
+              </div>
             ))}
+
           </div>
         </section>
 
